@@ -27,7 +27,10 @@ SOFTWARE.
 #include "glm/geometric.hpp"
 #include <algorithm>
 
-bool Triangle::TestIntersection(const glm::vec3& cam_pos, const glm::vec3& ray_dir, glm::vec3* out_intersection, float* out_distance) const
+#include "BuilderUtility.h"
+using namespace BuilderUtility;
+
+std::optional<SceneElement::Intersection> Triangle::TestIntersection(const glm::vec3& cam_pos, const glm::vec3& ray_dir) const
 {
    // https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
 
@@ -41,30 +44,30 @@ bool Triangle::TestIntersection(const glm::vec3& cam_pos, const glm::vec3& ray_d
    h = glm::cross(ray_dir, edge2);
    a = glm::dot(edge1, h);
    if (a > -EPSILON && a < EPSILON)
-      return false;
+      return std::nullopt;
 
    f = 1 / a;
    s = cam_pos - m_Vert1;
    u = f * (glm::dot(s, h));
    if (u < 0.0 || u > 1.0)
-      return false;
+      return std::nullopt;
 
    q = glm::cross(s, edge1);
    v = f * glm::dot(ray_dir, q);
    if (v < 0.0 || u + v > 1.0)
-      return false;
+      return std::nullopt;
 
    // At this stage we can compute t to find out where the intersection point is on the line.
    float t = f * glm::dot(edge2, q);
    if (t > EPSILON) // ray intersection
    {
-      *out_intersection = cam_pos + ray_dir * t;
-      *out_distance = t;
-      return true;
+      const auto intersection = cam_pos + ray_dir * t;
+      const auto distance = t;
+      return std::make_optional(std::make_tuple(intersection, distance));
    }
 
    // This means that there is a line intersection but not a ray intersection.
-   return false;
+   return std::nullopt;
 }
 
 glm::vec3 Triangle::CalcLightOuput(const glm::vec3 & ray_dir, const glm::vec3 & intersection_point, const Light & light) const
@@ -92,7 +95,7 @@ const Triangle::Builder& Triangle::Builder::ParseTriangle(const std::string& dat
 {
    std::string cut = data.substr(2, data.length() - 4);
 
-   for (std::string attribute : ParseParams(cut))
+   for (const auto attribute : ParseParams(cut))
    {
       if (attribute.find(V1) == 0)
       {

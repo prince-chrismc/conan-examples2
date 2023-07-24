@@ -24,7 +24,6 @@ SOFTWARE.
 
 #pragma once
 
-#include "BuilderUtility.h"
 #include "glm/vec3.hpp"
 #include <string>
 
@@ -40,7 +39,7 @@ class Camera
       double GetAspectRatio() const { return m_AspectRatio; }
       unsigned int GetFeildOfView() const { return m_FOV; }
 
-      class Builder : private BuilderUtility
+      class Builder
       {
          public:
             Builder() = default;

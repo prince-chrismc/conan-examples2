@@ -27,22 +27,27 @@ SOFTWARE.
 #include "glm/geometric.hpp"
 #include <algorithm>
 
-bool Plane::TestIntersection(const glm::vec3& cam_pos, const glm::vec3& ray_dir, glm::vec3* out_intersection, float* out_distance) const
+
+#include "BuilderUtility.h"
+
+using namespace BuilderUtility;
+
+std::optional<SceneElement::Intersection> Plane::TestIntersection(const glm::vec3& cam_pos, const glm::vec3& ray_dir) const
 {
-   auto normal = glm::normalize(m_Normal);
+   const auto normal = glm::normalize(m_Normal);
    float denom = glm::dot(normal, ray_dir);
 
    if (abs(denom) > 1e-6)
    {
       glm::vec3 p0l0 = m_Pos - ray_dir;
 
-      *out_distance = glm::dot(p0l0, normal) / denom;
-      *out_intersection = cam_pos + ray_dir * (*out_distance);
+      const auto distance = glm::dot(p0l0, normal) / denom;
+      const auto intersection = cam_pos + ray_dir * (distance);
 
-      return (*out_distance >= 0);
+      return (distance >= 0) ? std::make_optional(std::make_tuple(intersection, distance)) : std::nullopt;
    }
 
-   return false;
+   return std::nullopt;
 }
 
 glm::vec3 Plane::CalcLightOuput(const glm::vec3 & ray_dir, const glm::vec3 & intersection_point, const Light & light) const
@@ -68,7 +73,7 @@ const Plane::Builder& Plane::Builder::ParsePlane(const std::string& data)
 {
    std::string cut = data.substr(2, data.length() - 4);
 
-   for (std::string attribute : ParseParams(cut))
+   for (const auto attribute : ParseParams(cut))
    {
       if (attribute.find(POS) == 0)
       {

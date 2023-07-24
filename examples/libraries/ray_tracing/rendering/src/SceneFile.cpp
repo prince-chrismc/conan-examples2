@@ -69,7 +69,7 @@ std::string SceneFile::GetAttributes(const char* name)
    {
       if (itor->DoesNameMatch(name))
       {
-         retval = itor->GetAttributes();;
+         retval = itor->GetAttributes();
          itor = m_Elements.erase(itor);
          break;
       }

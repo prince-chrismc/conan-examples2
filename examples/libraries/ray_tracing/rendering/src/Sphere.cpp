@@ -27,7 +27,10 @@ SOFTWARE.
 #include "glm/geometric.hpp"   //normalize
 #include <algorithm>
 
-bool Sphere::TestIntersection(const glm::vec3& cam_pos, const glm::vec3& ray_dir, glm::vec3* out_intersection, float* out_distance) const
+#include "BuilderUtility.h"
+using namespace BuilderUtility;
+
+std::optional<SceneElement::Intersection> Sphere::TestIntersection(const glm::vec3& cam_pos, const glm::vec3& ray_dir) const
 {
    // https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection
 
@@ -36,7 +39,7 @@ bool Sphere::TestIntersection(const glm::vec3& cam_pos, const glm::vec3& ray_dir
    float tca = glm::dot(length, ray_dir);
 
    float rad_dir_squared = glm::dot(length, length) - tca * tca;
-   if (rad_dir_squared > (m_Radius * m_Radius)) return false; // doesn't pass through
+   if (rad_dir_squared > (m_Radius * m_Radius)) return std::nullopt; // doesn't pass through
 
    float thc = std::sqrt((m_Radius * m_Radius) - rad_dir_squared);
    intersection_zero = tca - thc;
@@ -47,13 +50,13 @@ bool Sphere::TestIntersection(const glm::vec3& cam_pos, const glm::vec3& ray_dir
    if (intersection_zero < 0.0f)
    {
       intersection_zero = intersection_one;
-      if (intersection_zero < 0.0f) return false; // both intersection are negative
+      if (intersection_zero < 0.0f) return std::nullopt; // both intersection are negative
    }
 
-   *out_distance = intersection_zero;
-   *out_intersection = cam_pos + ray_dir * intersection_zero;
+   const auto distance = intersection_zero;
+   const auto intersection = cam_pos + ray_dir * intersection_zero;
 
-   return true;
+   return std::make_optional(std::make_tuple(intersection, distance));
 }
 
 glm::vec3 Sphere::CalcLightOuput(const glm::vec3& ray_dir, const glm::vec3 & intersection_point, const Light & light) const
@@ -79,7 +82,7 @@ const Sphere::Builder& Sphere::Builder::ParseSphere(const std::string& data)
 {
    std::string cut = data.substr(2, data.length() - 4);
 
-   for (std::string attribute : ParseParams(cut))
+   for (const auto attribute : ParseParams(cut))
    {
       if (attribute.find(POS) == 0)
       {

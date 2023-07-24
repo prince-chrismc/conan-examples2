@@ -31,6 +31,7 @@ SOFTWARE.
 
 #include <string>
 #include <future>
+#include <tuple>
 
 #ifdef _WIN32
 #include <corecrt_math_defines.h>
@@ -156,11 +157,11 @@ Scene::IntersectingObject Scene::FindNearestIntersectingObject(const glm::vec3& 
 
    for (const auto elem : m_Objects)
    {
-      float distance;
-      glm::vec3 intersectpoint;
 
-      if (elem->TestIntersection(m_Camera.GetPosition(), ray_dir, &intersectpoint, &distance))
+      if (auto intersection = elem->TestIntersection(m_Camera.GetPosition(), ray_dir))
       {
+         float distance = std::get<1>(intersection.value());
+         glm::vec3 intersectpoint = std::get<0>(intersection.value());
          if (!target.m_Element || distance < target.m_Distance)
          {
             target = IntersectingObject(intersectpoint, distance, elem);
@@ -176,12 +177,9 @@ bool Scene::IsLightObstructed(const Light& light, const IntersectingObject& targ
    glm::vec3 lightRay = glm::normalize(light.GetPosition() - target.m_Point);
    glm::vec3 lightRayWithBias = (LIGHT_BIAS * lightRay) + target.m_Point;
 
-   float distance;
-   glm::vec3 intersectpoint;
-
    for (const auto elem : m_Objects)
    {
-      if (elem->TestIntersection(lightRayWithBias, lightRay, &intersectpoint, &distance)) return true;
+      if (elem->TestIntersection(lightRayWithBias, lightRay).has_value()) return true;
    }
 
    return false;

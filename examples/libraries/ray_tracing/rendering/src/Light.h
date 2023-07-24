@@ -24,7 +24,6 @@ SOFTWARE.
 
 #pragma once
 
-#include "BuilderUtility.h"
 #include "glm/vec3.hpp"
 #include <string>
 
@@ -37,7 +36,7 @@ class Light
        glm::vec3 GetPosition() const { return m_Pos; }
        glm::vec3 GetColor() const { return m_Col; }
 
-      class Builder : private BuilderUtility
+      class Builder
       {
          public:
             Builder() = default;

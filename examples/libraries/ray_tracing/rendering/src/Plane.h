@@ -24,23 +24,23 @@ SOFTWARE.
 
 #pragma once
 
-#include "BuilderUtility.h"
 #include "SceneElement.h"
 #include <string>
 
 class Plane : public SceneElement
 {
+
    public:
       Plane() = default;
       Plane(const glm::vec3& pos, const glm::vec3& nor, const glm::vec3& amb, const glm::vec3& dif, const glm::vec3& spe, const float& shine) :
          m_Pos(pos), m_Normal(nor),  m_Amb(amb), m_Dif(dif), m_Spe(spe), m_Shine(shine) {}
 
-      bool TestIntersection(const glm::vec3& cam_pos, const glm::vec3& ray_dir, glm::vec3* out_intersection, float* out_distance) const;
+      std::optional<SceneElement::Intersection> TestIntersection(const glm::vec3& cam_pos, const glm::vec3& ray_dir) const;
       glm::vec3 CalcLightOuput(const glm::vec3& ray_dir, const glm::vec3& intersection_point, const Light& light) const;
 
       glm::vec3 GetAmbientlight() const { return m_Amb; }
 
-      class Builder : private BuilderUtility
+      class Builder
       {
       public:
          Builder() = default;

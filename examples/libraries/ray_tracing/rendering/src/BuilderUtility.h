@@ -28,21 +28,22 @@ SOFTWARE.
 #include <string>
 #include <vector>
 
-class BuilderUtility
+using std::string_view_literals::operator "" sv;
+
+namespace BuilderUtility
 {
-   protected:
-      static std::vector<std::string> ParseParams(std::string cut);
-      static glm::vec3 ParseVec3(std::string attribute);
-      static unsigned int ParseUint(std::string attribute);
-      static double ParseDouble(std::string attribute);
-      static float ParseFloat(std::string attribute);
+      std::vector<std::string> ParseParams(std::string cut);
+      glm::vec3 ParseVec3(std::string attribute);
+      unsigned int ParseUint(std::string attribute);
+      double ParseDouble(std::string attribute);
+      float ParseFloat(std::string attribute);
 
-      const char* POS = "pos:";
+      constexpr const auto POS = "pos:"sv;
 
-      const char* AMB = "amb:";
-      const char* DIF = "dfi:";
-      const char* SPE = "spe:";
-      const char* SHI = "shi:";
+      constexpr const auto AMB = "amb:"sv;
+      constexpr const auto DIF = "dfi:"sv;
+      constexpr const auto SPE = "spe:"sv;
+      constexpr const auto SHI = "shi:"sv;
 
       enum NameOffset { OFFSET_3CHAR = 5, OFFSET_2CHAR = 4, OFFSET_1CHAR = 3 };
 };

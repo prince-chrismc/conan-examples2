@@ -25,11 +25,14 @@ SOFTWARE.
 #include "Camera.h"
 #include "glm/trigonometric.hpp"
 
+#include "BuilderUtility.h"
+using namespace BuilderUtility;
+
 Camera::Builder& Camera::Builder::ParseCamera(const std::string& data)
 {
    std::string cut = data.substr(2, data.length() - 4);
 
-   for (std::string attribute : ParseParams(cut))
+   for (const auto attribute : ParseParams(cut))
    {
       if (attribute.find(POS) == 0)
       {
