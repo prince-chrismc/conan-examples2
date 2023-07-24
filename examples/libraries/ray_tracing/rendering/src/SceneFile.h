@@ -26,6 +26,7 @@ SOFTWARE.
 
 #include <vector>
 #include <string>
+#include <iosfwd> // for ifstream
 
 class SceneFile
 {

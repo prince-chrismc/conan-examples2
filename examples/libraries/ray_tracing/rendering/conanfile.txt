@@ -12,3 +12,6 @@ CMakeDeps
 
 [layout]
 cmake_layout
+
+[options]
+cimg/*:enable_png=True

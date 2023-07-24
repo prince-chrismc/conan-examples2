@@ -23,10 +23,8 @@ SOFTWARE.
 */
 
 #include "Scene.h"
-#include "glm/gtc/matrix_transform.hpp" //glm::lookAt, scale, etc...
-#include <vector>
+
 #include <iostream>
-#include <sstream>
 
 int main()
 {
@@ -36,8 +34,6 @@ int main()
    std::cout << "Loading Scene....";
    Scene scene("assets/scene2.txt");
    std::cout << "  COMPLETE!" << std::endl;
-
-   scene.Display();
 
    return 0;
 }

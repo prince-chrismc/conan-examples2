@@ -38,8 +38,6 @@ class Scene : private SceneFile
    public:
       Scene(const char* path);
 
-      void Display();
-
    private:
       Camera m_Camera;
       std::vector<Light> m_Lights;

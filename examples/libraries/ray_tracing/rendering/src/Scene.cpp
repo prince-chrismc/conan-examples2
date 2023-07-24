@@ -26,7 +26,9 @@ SOFTWARE.
 #include "Sphere.h"
 #include "Triangle.h"
 #include "Plane.h"
+
 #include "glm/geometric.hpp"
+
 #include <string>
 #include <future>
 
@@ -35,7 +37,6 @@ SOFTWARE.
 #endif
 
 using cimg_library::CImg;
-using cimg_library::CImgDisplay;
 
 static const float LIGHT_BIAS = 1e-3f;
 
@@ -51,16 +52,6 @@ Scene::Scene(const char* path) : SceneFile(path)
 
       GenerateScene();
    }
-}
-
-void Scene::Display()
-{
-   // CImgDisplay display(m_Image, "Image");
-
-   // while(!display.is_closed())
-   // {
-   //    if(display.is_keyESC()) display.close();
-   // }
 }
 
 void Scene::ExtractLights()
@@ -144,7 +135,8 @@ void Scene::GenerateScene()
    }
 
    m_Image.normalize(0, 255);
-   m_Image.save("render2.bmp", true);
+   m_Image.blur(0.5f, 0.5f, 0.5f);
+   m_Image.save_png("render2.png", true);
 }
 
 glm::vec3 Scene::CalcRayDirection(const int x_val, const int y_val)
