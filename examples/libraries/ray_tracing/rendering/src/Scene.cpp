@@ -75,31 +75,30 @@ void Scene::GenerateScene()
    {
       results.push_back( std::async(std::launch::async, [this, x, height]{ // Create a task
          std::vector<glm::vec3> retval;
+         
          // Sequentially
          for (int y = 0; y < height; y += 1) // For each pixel in the line
          {
+            glm::vec3 pixelColor(0.0f); // This is what we need to figure out
             glm::vec3 rayDirection = CalcRayDirection(x, y); // Get the vector to the camera
 
             // Does this vector hit any objects
             const auto optionalTarget = FindNearestIntersectingObject(rayDirection);
-            if(!optionalTarget.has_value())
+            if(optionalTarget.has_value())
             {
-               continue;
-            }
-
-            const auto target = optionalTarget.value();
-            glm::vec3 pixelColor(0.0f);
-
-            for (const Light light : m_Lights)
-            {
-               // Start with the base glow of the element
-               pixelColor += target.m_Element->GetAmbientlight();
-               if (!IsLightObstructed(light, target)) // Is the light blocked by other elements
+               const auto target = optionalTarget.value();
+               for (const Light light : m_Lights)
                {
-                  // Add the reflected light for the color
-                  pixelColor += target.m_Element->CalcLightOuput(rayDirection, target.m_Point, light);
+                  // Start with the base glow of the element
+                  pixelColor += target.m_Element->GetAmbientlight();
+                  if (!IsLightObstructed(light, target)) // Is the light blocked by other elements
+                  {
+                     // Add the reflected light for the color
+                     pixelColor += target.m_Element->CalcLightOuput(rayDirection, target.m_Point, light);
+                  }
                }
             }
+
             retval.push_back(pixelColor);
          }
          return retval;
@@ -147,8 +146,8 @@ std::optional<Scene::IntersectingObject> Scene::FindNearestIntersectingObject(co
          float distance = std::get<1>(intersection.value());
          glm::vec3 intersectpoint = std::get<0>(intersection.value());
 
-         if (!target.m_Element || // Is it the first one we've seen
-            distance < target.m_Distance) // Or, is it closer then the last one
+         if (!target.has_value() || // Is it the first one we've seen
+            distance < target->m_Distance) // Or, is it closer then the last one
          {
             // Save it to compare against
             target = std::make_optional(IntersectingObject(intersectpoint, distance, elem));
