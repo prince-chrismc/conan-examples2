@@ -9,6 +9,7 @@
 #include "CImg.h"
 
 #include <memory>
+#include <optional>
 
 
 class Scene : private SceneFile
@@ -40,6 +41,6 @@ class Scene : private SceneFile
 
       void GenerateScene();
       glm::vec3 CalcRayDirection(const int x_val, const int y_val);
-      IntersectingObject FindNearestIntersectingObject(const glm::vec3& ray_dir);
+      std::optional<IntersectingObject> FindNearestIntersectingObject(const glm::vec3& ray_dir);
       bool IsLightObstructed(const Light& light, const IntersectingObject& target);
 };

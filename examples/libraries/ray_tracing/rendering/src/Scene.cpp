@@ -71,26 +71,33 @@ void Scene::GenerateScene()
    m_Image = CImg<float>(width, height, 1, 3, 0);
 
    std::vector<std::future<std::vector<glm::vec3>>> results;
-   for (int x = 0; x < width; x += 1)
+   for (int x = 0; x < width; x += 1) // For each vertical line
    {
-      results.push_back( std::async(std::launch::async, [this, x, height]{
+      results.push_back( std::async(std::launch::async, [this, x, height]{ // Create a task
          std::vector<glm::vec3> retval;
-         for (int y = 0; y < height; y += 1)
+         // Sequentially
+         for (int y = 0; y < height; y += 1) // For each pixel in the line
          {
-            glm::vec3 rayDirection = CalcRayDirection(x, y);
+            glm::vec3 rayDirection = CalcRayDirection(x, y); // Get the vector to the camera
 
-            IntersectingObject target = FindNearestIntersectingObject(rayDirection);
+            // Does this vector hit any objects
+            const auto optionalTarget = FindNearestIntersectingObject(rayDirection);
+            if(!optionalTarget.has_value())
+            {
+               continue;
+            }
+
+            const auto target = optionalTarget.value();
             glm::vec3 pixelColor(0.0f);
 
-            if (target.m_Element)
+            for (const Light light : m_Lights)
             {
-               for (const Light light : m_Lights)
+               // Start with the base glow of the element
+               pixelColor += target.m_Element->GetAmbientlight();
+               if (!IsLightObstructed(light, target)) // Is the light blocked by other elements
                {
-                  pixelColor += target.m_Element->GetAmbientlight();
-                  if (!IsLightObstructed(light, target))
-                  {
-                     pixelColor += target.m_Element->CalcLightOuput(rayDirection, target.m_Point, light);
-                  }
+                  // Add the reflected light for the color
+                  pixelColor += target.m_Element->CalcLightOuput(rayDirection, target.m_Point, light);
                }
             }
             retval.push_back(pixelColor);
@@ -127,20 +134,24 @@ glm::vec3 Scene::CalcRayDirection(const int x_val, const int y_val)
    return glm::normalize(glm::vec3(PCx, PCy, -1) - m_Camera.GetPosition());
 }
 
-Scene::IntersectingObject Scene::FindNearestIntersectingObject(const glm::vec3& ray_dir)
+std::optional<Scene::IntersectingObject> Scene::FindNearestIntersectingObject(const glm::vec3& ray_dir)
 {
-   IntersectingObject target;
+   std::optional<IntersectingObject> target;
 
-   for (const auto elem : m_Objects)
+   for (const auto elem : m_Objects) // For each element in the Scene
    {
-
+       // Is the object seen by the camera
       if (auto intersection = elem->TestIntersection(m_Camera.GetPosition(), ray_dir))
       {
+         // If so...
          float distance = std::get<1>(intersection.value());
          glm::vec3 intersectpoint = std::get<0>(intersection.value());
-         if (!target.m_Element || distance < target.m_Distance)
+
+         if (!target.m_Element || // Is it the first one we've seen
+            distance < target.m_Distance) // Or, is it closer then the last one
          {
-            target = IntersectingObject(intersectpoint, distance, elem);
+            // Save it to compare against
+            target = std::make_optional(IntersectingObject(intersectpoint, distance, elem));
          }
       }
    }
