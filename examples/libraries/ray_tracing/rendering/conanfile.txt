@@ -1,10 +1,6 @@
 [requires]
-#opengl/system
-#glfw/3.3.8
 glm/cci.20230113
-#glew/2.2.0
 cimg/3.2.5
-#freetype/2.13.0
 
 [generators]
 CMakeToolchain
